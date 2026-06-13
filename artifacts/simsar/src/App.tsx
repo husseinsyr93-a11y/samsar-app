@@ -1,8 +1,13 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { initAdMob } from "@/lib/admob";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/Navbar";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { setBaseUrl } from "@workspace/api-client-react";
+import { getApiBaseUrl } from "@/capacitor-api";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Properties from "@/pages/properties";
@@ -14,6 +19,11 @@ import Neighborhoods from "@/pages/neighborhoods";
 import AiAssistant from "@/pages/ai-assistant";
 import Admin from "@/pages/admin";
 import AddProperty from "@/pages/add-property";
+
+// Resolve API base URL before first render.
+// On Android WebView, Capacitor serves from http://localhost so relative "/api"
+// would hit the wrong host. This sets the correct absolute URL for native builds.
+setBaseUrl(getApiBaseUrl());
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,15 +56,21 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    initAdMob().catch(() => {});
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <WouterRouter base="">
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
