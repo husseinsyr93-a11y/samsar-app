@@ -1,22 +1,37 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Simsar Real Estate Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: properties
+    description: Property listings
+  - name: users
+    description: User management
+  - name: favorites
+    description: Favorites management
+  - name: matches
+    description: Match system
+  - name: messages
+    description: Messaging system
+  - name: neighborhoods
+    description: Neighborhood ratings
+  - name: reviews
+    description: Reviews
+  - name: stats
+    description: Statistics and analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +39,980 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Properties ───────────────────────────────────────────────────────────
+  /properties:
+    get:
+      operationId: listProperties
+      tags: [properties]
+      summary: List properties with filters
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: type
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: minRent
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: maxRent
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: rooms
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: page
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: limit
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: featured
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertyList"
+    post:
+      operationId: createProperty
+      tags: [properties]
+      summary: Create a new property listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PropertyInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+
+  /properties/{id}:
+    get:
+      operationId: getProperty
+      tags: [properties]
+      summary: Get a property by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Property details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProperty
+      tags: [properties]
+      summary: Update property
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PropertyUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Property"
+    delete:
+      operationId: deleteProperty
+      tags: [properties]
+      summary: Delete property
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /properties/{id}/score:
+    get:
+      operationId: getPropertyScore
+      tags: [properties]
+      summary: Get AI score for property
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI property score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertyScore"
+
+  /properties/featured:
+    get:
+      operationId: listFeaturedProperties
+      tags: [properties]
+      summary: List featured/premium properties
+      responses:
+        "200":
+          description: Featured properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /properties/stats/summary:
+    get:
+      operationId: getPropertyStats
+      tags: [stats]
+      summary: Platform-wide property statistics
+      responses:
+        "200":
+          description: Property statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PropertyStats"
+
+  /properties/cities/distribution:
+    get:
+      operationId: getCityDistribution
+      tags: [stats]
+      summary: Property count by city
+      responses:
+        "200":
+          description: City distribution
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CityCount"
+
+  # ─── Favorites ────────────────────────────────────────────────────────────
+  /favorites:
+    get:
+      operationId: listFavorites
+      tags: [favorites]
+      summary: Get user favorites
+      responses:
+        "200":
+          description: Favorites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+    post:
+      operationId: addFavorite
+      tags: [favorites]
+      summary: Add to favorites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoriteInput"
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Favorite"
+
+  /favorites/{propertyId}:
+    delete:
+      operationId: removeFavorite
+      tags: [favorites]
+      summary: Remove from favorites
+      parameters:
+        - name: propertyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  # ─── Matches ──────────────────────────────────────────────────────────────
+  /matches:
+    get:
+      operationId: listMatches
+      tags: [matches]
+      summary: List user matches
+      responses:
+        "200":
+          description: Matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Match"
+    post:
+      operationId: createMatch
+      tags: [matches]
+      summary: Express interest in a property (like)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchInput"
+      responses:
+        "201":
+          description: Match created/updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
+  /matches/suggestions:
+    get:
+      operationId: getMatchSuggestions
+      tags: [matches]
+      summary: Get AI-powered property suggestions (Tinder-style)
+      responses:
+        "200":
+          description: Suggested properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  # ─── Messages ─────────────────────────────────────────────────────────────
+  /messages:
+    get:
+      operationId: listConversations
+      tags: [messages]
+      summary: List user conversations
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+
+  /messages/{conversationId}:
+    get:
+      operationId: getMessages
+      tags: [messages]
+      summary: Get messages in a conversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  # ─── Neighborhoods ────────────────────────────────────────────────────────
+  /neighborhoods:
+    get:
+      operationId: listNeighborhoods
+      tags: [neighborhoods]
+      summary: List neighborhood ratings
+      parameters:
+        - name: city
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Neighborhoods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Neighborhood"
+
+  /neighborhoods/{id}:
+    get:
+      operationId: getNeighborhood
+      tags: [neighborhoods]
+      summary: Get neighborhood details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Neighborhood details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Neighborhood"
+
+  # ─── Reviews ──────────────────────────────────────────────────────────────
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: List reviews
+      parameters:
+        - name: propertyId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: neighborhoodId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+    post:
+      operationId: createReview
+      tags: [reviews]
+      summary: Create a review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+
+  # ─── AI Assistant ─────────────────────────────────────────────────────────
+  /ai/recommend:
+    post:
+      operationId: getAiRecommendations
+      tags: [properties]
+      summary: Get AI-powered property recommendations based on user needs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiRecommendInput"
+      responses:
+        "200":
+          description: Recommended properties
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Property"
+
+  /ai/describe:
+    post:
+      operationId: generatePropertyDescription
+      tags: [properties]
+      summary: Generate professional Arabic/German description for a property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DescribePropertyInput"
+      responses:
+        "200":
+          description: Generated description
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedDescription"
+
+  # ─── Platform Stats (Dashboard) ───────────────────────────────────────────
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Admin dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [stats]
+      summary: Recent platform activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ─── Property ─────────────────────────────────────────────────────────
+    Property:
+      type: object
+      required: [id, title, titleAr, city, address, rent, rooms, area, type, status, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: ["string", "null"]
+        descriptionAr:
+          type: ["string", "null"]
+        city:
+          type: string
+        district:
+          type: ["string", "null"]
+        address:
+          type: string
+        lat:
+          type: ["number", "null"]
+        lng:
+          type: ["number", "null"]
+        rent:
+          type: integer
+        deposit:
+          type: ["integer", "null"]
+        rooms:
+          type: number
+        area:
+          type: number
+        floor:
+          type: ["integer", "null"]
+        totalFloors:
+          type: ["integer", "null"]
+        type:
+          type: string
+          enum: [apartment, house, room, studio, office, commercial]
+        status:
+          type: string
+          enum: [available, rented, reserved]
+        tier:
+          type: string
+          enum: [basic, featured, gold, platinum]
+        amenities:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        ownerName:
+          type: ["string", "null"]
+        ownerPhone:
+          type: ["string", "null"]
+        isVerified:
+          type: boolean
+        nearMosque:
+          type: boolean
+        nearSchool:
+          type: boolean
+        nearSupermarket:
+          type: boolean
+        nearStation:
+          type: boolean
+        aiScore:
+          type: ["integer", "null"]
+        viewCount:
+          type: integer
+        createdAt:
+          type: string
+
+    PropertyList:
+      type: object
+      required: [items, total, page, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Property"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    PropertyInput:
+      type: object
+      required: [title, titleAr, city, address, rent, rooms, area, type]
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        city:
+          type: string
+        district:
+          type: string
+        address:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        rent:
+          type: integer
+        deposit:
+          type: integer
+        rooms:
+          type: number
+        area:
+          type: number
+        floor:
+          type: integer
+        totalFloors:
+          type: integer
+        type:
+          type: string
+          enum: [apartment, house, room, studio, office, commercial]
+        amenities:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        nearMosque:
+          type: boolean
+        nearSchool:
+          type: boolean
+        nearSupermarket:
+          type: boolean
+        nearStation:
+          type: boolean
+
+    PropertyUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        titleAr:
+          type: string
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        rent:
+          type: integer
+        status:
+          type: string
+          enum: [available, rented, reserved]
+        tier:
+          type: string
+          enum: [basic, featured, gold, platinum]
+        amenities:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+
+    PropertyScore:
+      type: object
+      required: [total, price, location, transport, safety, schools, internet, services]
+      properties:
+        total:
+          type: integer
+        price:
+          type: integer
+        location:
+          type: integer
+        transport:
+          type: integer
+        safety:
+          type: integer
+        schools:
+          type: integer
+        internet:
+          type: integer
+        services:
+          type: integer
+        summary:
+          type: string
+
+    PropertyStats:
+      type: object
+      required: [totalListings, availableListings, avgRent, citiesCount, newThisWeek]
+      properties:
+        totalListings:
+          type: integer
+        availableListings:
+          type: integer
+        avgRent:
+          type: integer
+        citiesCount:
+          type: integer
+        newThisWeek:
+          type: integer
+        totalMatches:
+          type: integer
+        totalUsers:
+          type: integer
+
+    CityCount:
+      type: object
+      required: [city, count]
+      properties:
+        city:
+          type: string
+        count:
+          type: integer
+        avgRent:
+          type: integer
+
+    # ─── Favorites ────────────────────────────────────────────────────────
+    Favorite:
+      type: object
+      required: [id, propertyId, userId, createdAt]
+      properties:
+        id:
+          type: integer
+        propertyId:
+          type: integer
+        userId:
+          type: integer
+        createdAt:
+          type: string
+
+    FavoriteInput:
+      type: object
+      required: [propertyId]
+      properties:
+        propertyId:
+          type: integer
+
+    # ─── Matches ──────────────────────────────────────────────────────────
+    Match:
+      type: object
+      required: [id, propertyId, status, createdAt]
+      properties:
+        id:
+          type: integer
+        propertyId:
+          type: integer
+        status:
+          type: string
+          enum: [pending, matched, rejected]
+        property:
+          $ref: "#/components/schemas/Property"
+        createdAt:
+          type: string
+
+    MatchInput:
+      type: object
+      required: [propertyId, action]
+      properties:
+        propertyId:
+          type: integer
+        action:
+          type: string
+          enum: [like, dislike]
+
+    # ─── Messages ─────────────────────────────────────────────────────────
+    Conversation:
+      type: object
+      required: [id, propertyId, lastMessage, unreadCount, createdAt]
+      properties:
+        id:
+          type: integer
+        propertyId:
+          type: integer
+        propertyTitle:
+          type: ["string", "null"]
+        propertyImage:
+          type: ["string", "null"]
+        otherPartyName:
+          type: ["string", "null"]
+        lastMessage:
+          type: string
+        unreadCount:
+          type: integer
+        createdAt:
+          type: string
+
+    Message:
+      type: object
+      required: [id, conversationId, content, isOwn, createdAt]
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        content:
+          type: string
+        isOwn:
+          type: boolean
+        senderName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    # ─── Neighborhoods ────────────────────────────────────────────────────
+    Neighborhood:
+      type: object
+      required: [id, name, nameAr, city, safety, cleanliness, quiet, transport, arabCommunity, schools, employment]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameAr:
+          type: string
+        city:
+          type: string
+        description:
+          type: ["string", "null"]
+        descriptionAr:
+          type: ["string", "null"]
+        safety:
+          type: integer
+        cleanliness:
+          type: integer
+        quiet:
+          type: integer
+        transport:
+          type: integer
+        arabCommunity:
+          type: integer
+        schools:
+          type: integer
+        employment:
+          type: integer
+        overallScore:
+          type: integer
+        avgRent:
+          type: ["integer", "null"]
+        propertiesCount:
+          type: integer
+        reviewsCount:
+          type: integer
+
+    # ─── Reviews ──────────────────────────────────────────────────────────
+    Review:
+      type: object
+      required: [id, rating, content, createdAt]
+      properties:
+        id:
+          type: integer
+        propertyId:
+          type: ["integer", "null"]
+        neighborhoodId:
+          type: ["integer", "null"]
+        rating:
+          type: integer
+        content:
+          type: string
+        authorName:
+          type: string
+        authorAvatar:
+          type: ["string", "null"]
+        isVerified:
+          type: boolean
+        createdAt:
+          type: string
+
+    ReviewInput:
+      type: object
+      required: [rating, content]
+      properties:
+        propertyId:
+          type: integer
+        neighborhoodId:
+          type: integer
+        rating:
+          type: integer
+        content:
+          type: string
+
+    # ─── AI ───────────────────────────────────────────────────────────────
+    AiRecommendInput:
+      type: object
+      required: [budget, familySize]
+      properties:
+        budget:
+          type: integer
+        familySize:
+          type: integer
+        hasChildren:
+          type: boolean
+        hasCar:
+          type: boolean
+        needsSchool:
+          type: boolean
+        needsMosque:
+          type: boolean
+        preferredCity:
+          type: string
+        rooms:
+          type: integer
+
+    DescribePropertyInput:
+      type: object
+      required: [propertyId]
+      properties:
+        propertyId:
+          type: integer
+        language:
+          type: string
+          enum: [ar, de, both]
+
+    GeneratedDescription:
+      type: object
+      required: [arabic]
+      properties:
+        arabic:
+          type: string
+        german:
+          type: ["string", "null"]
+
+    # ─── Stats ────────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totalUsers, totalProperties, activeListings, totalMatches, monthlyRevenue, newUsersThisMonth, pendingReports]
+      properties:
+        totalUsers:
+          type: integer
+        totalProperties:
+          type: integer
+        activeListings:
+          type: integer
+        totalMatches:
+          type: integer
+        monthlyRevenue:
+          type: integer
+        newUsersThisMonth:
+          type: integer
+        pendingReports:
+          type: integer
+        featuredListings:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [new_listing, new_match, new_review, new_user, new_message]
+        description:
+          type: string
+        descriptionAr:
+          type: string
+        icon:
+          type: string
+        createdAt:
+          type: string

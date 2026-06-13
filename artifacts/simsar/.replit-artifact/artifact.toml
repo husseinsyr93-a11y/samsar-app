@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "سمسار - منصة العقارات العربية"
+version = "1.0.0"
+id = "artifacts/simsar"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24795
+
+[services.development]
+run = "pnpm --filter @workspace/simsar run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/simsar", "run", "build" ]
+publicDir = "artifacts/simsar/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24795"
+BASE_PATH = "/"
