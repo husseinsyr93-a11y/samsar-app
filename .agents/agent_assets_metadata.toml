@@ -6,3 +6,9 @@ id = "FyxrlRtFJYc4G5NufPQDL"
 uri = "file://APK_BUILD_GUIDE.md"
 type = "text"
 title = "دليل بناء APK — سمسار"
+
+[[outputs]]
+id = "xOdIkznEXfjqUv15vR-UJ"
+uri = "file://samsar-app.tar.gz"
+type = "unspecified"
+title = "سمسار — كامل كود المشروع"
