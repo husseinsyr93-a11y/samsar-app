@@ -4,21 +4,55 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>سمسار - منصة العقارات العربية</title>
-    <meta name="description" content="سمسار - منصة العقارات العربية — built on Replit. Update this description to reflect the app." />
+    <meta name="description" content="سمسار — أول منصة عقارية عربية في أوروبا. ابحث عن شقتك المثالية في ألمانيا وأوروبا." />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="سمسار - منصة العقارات العربية" />
-    <meta property="og:description" content="سمسار - منصة العقارات العربية — built on Replit. Update this description to reflect the app." />
+    <meta property="og:description" content="أول منصة عقارية عربية في أوروبا" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="سمسار - منصة العقارات العربية" />
-    <meta name="twitter:description" content="سمسار - منصة العقارات العربية — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:description" content="أول منصة عقارية عربية في أوروبا" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Prevent white flash: set background before any JS loads -->
+    <style>
+      html, body { margin: 0; padding: 0; background: #0f172a; }
+      #root[data-loading] {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #0f172a;
+        font-family: 'Cairo', sans-serif;
+        direction: rtl;
+      }
+      #root[data-loading]::before {
+        content: 'سمسار';
+        font-size: 2rem;
+        font-weight: 800;
+        color: #f59e0b;
+        letter-spacing: 0.05em;
+      }
+      #root[data-loading]::after {
+        content: '';
+        margin-top: 1.5rem;
+        width: 40px;
+        height: 40px;
+        border: 3px solid #1e293b;
+        border-top-color: #f59e0b;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- data-loading shows the spinner until React mounts and removes the attribute -->
+    <div id="root" data-loading></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
