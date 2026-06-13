@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, master]
   workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: "API base URL for the APK (e.g. https://yourapp.replit.app/api)"
+        required: false
 
 jobs:
   build:
@@ -44,7 +48,9 @@ jobs:
         working-directory: artifacts/simsar
         env:
           NODE_ENV: production
-          VITE_API_BASE_URL: https://samsar.replit.app/api
+          # Set VITE_API_BASE_URL in GitHub Actions Secrets for production.
+          # Fallback: use the dispatch input, then the repo secret, then the default URL.
+          VITE_API_BASE_URL: ${{ inputs.api_base_url || secrets.VITE_API_BASE_URL || 'https://samsar-app.replit.app/api' }}
         run: pnpm exec vite build --config vite.config.capacitor.ts
 
       - name: Add Android platform
@@ -59,13 +65,13 @@ jobs:
         working-directory: artifacts/simsar/android
         run: chmod +x gradlew
 
-      - name: Build Release APK
-        working-directory: artifacts/simsar/android
-        run: ./gradlew assembleRelease --no-daemon
-
       - name: Build Debug APK
         working-directory: artifacts/simsar/android
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Build Release APK
+        working-directory: artifacts/simsar/android
+        run: ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
