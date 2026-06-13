@@ -5,20 +5,26 @@ const config: CapacitorConfig = {
   appName: "سمسار",
   webDir: "dist",
   server: {
-    // In production, point to your deployed API server
-    // androidScheme: "https",
-    // url: "https://your-production-domain.replit.app",
-    // cleartext: false,
+    // androidScheme controls the URL scheme for the WebView.
+    // "https" → https://localhost  |  "http" (default) → http://localhost
+    // Keep "https" to avoid mixed-content issues when calling the production API.
+    androidScheme: "https",
   },
   android: {
     buildOptions: {
       releaseType: "APK",
     },
-    allowMixedContent: true,
+    allowMixedContent: false,
     captureInput: true,
-    webContentsDebuggingEnabled: false,
+    // Enable Chrome DevTools remote debugging (chrome://inspect) — disable for release
+    webContentsDebuggingEnabled: true,
   },
   plugins: {
+    AdMob: {
+      appIdAdAndroid: "ca-app-pub-3940256099942544~3347511713",
+      appIdAdIos: "ca-app-pub-3940256099942544~1458002511",
+      isTesting: true,
+    },
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
