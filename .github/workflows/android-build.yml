@@ -44,13 +44,27 @@ jobs:
         working-directory: artifacts/simsar
         run: pnpm exec vite build --config vite.config.capacitor.ts
 
+      - name: Debug Capacitor environment
+        working-directory: artifacts/simsar
+        run: |
+          echo "=== Node version ==="
+          node --version
+          echo "=== Cap binary ==="
+          ls node_modules/.bin/ | grep cap || echo "no cap binary found"
+          echo "=== Capacitor packages ==="
+          ls node_modules/@capacitor/ 2>/dev/null || echo "no @capacitor dir"
+          echo "=== Config file ==="
+          ls capacitor.config.* 2>/dev/null || echo "no capacitor config"
+          echo "=== Dist dir ==="
+          ls dist/ 2>/dev/null || echo "no dist dir"
+
       - name: Add Android platform
         working-directory: artifacts/simsar
-        run: pnpm exec cap add android
+        run: node_modules/.bin/cap add android
 
       - name: Sync Capacitor
         working-directory: artifacts/simsar
-        run: pnpm exec cap sync android
+        run: node_modules/.bin/cap sync android
 
       - name: Make Gradle executable
         working-directory: artifacts/simsar/android
