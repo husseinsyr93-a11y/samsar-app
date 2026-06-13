@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -37,26 +37,15 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android platform
+      - name: Install Android platform tools
         run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Build web assets
         working-directory: artifacts/simsar
+        env:
+          NODE_ENV: production
+          VITE_API_BASE_URL: https://samsar.replit.app/api
         run: pnpm exec vite build --config vite.config.capacitor.ts
-
-      - name: Debug Capacitor environment
-        working-directory: artifacts/simsar
-        run: |
-          echo "=== Node version ==="
-          node --version
-          echo "=== Cap binary ==="
-          ls node_modules/.bin/ | grep cap || echo "no cap binary found"
-          echo "=== Capacitor packages ==="
-          ls node_modules/@capacitor/ 2>/dev/null || echo "no @capacitor dir"
-          echo "=== Config file ==="
-          ls capacitor.config.* 2>/dev/null || echo "no capacitor config"
-          echo "=== Dist dir ==="
-          ls dist/ 2>/dev/null || echo "no dist dir"
 
       - name: Add Android platform
         working-directory: artifacts/simsar
@@ -70,13 +59,25 @@ jobs:
         working-directory: artifacts/simsar/android
         run: chmod +x gradlew
 
-      - name: Build APK
+      - name: Build Release APK
+        working-directory: artifacts/simsar/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Build Debug APK
         working-directory: artifacts/simsar/android
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: samsar-debug-apk
           path: artifacts/simsar/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: samsar-release-apk
+          path: artifacts/simsar/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 30
+          if-no-files-found: warn
