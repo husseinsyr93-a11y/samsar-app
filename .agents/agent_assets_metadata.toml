@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "FyxrlRtFJYc4G5NufPQDL"
+uri = "file://APK_BUILD_GUIDE.md"
+type = "text"
+title = "دليل بناء APK — سمسار"

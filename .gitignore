@@ -47,3 +47,13 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Capacitor Android build artifacts (android/ dir created by CI via cap add android)
+artifacts/simsar/android/app/build/
+artifacts/simsar/android/.gradle/
+artifacts/simsar/android/build/
+artifacts/simsar/android/captures/
+artifacts/simsar/.cap/
+
+# Capacitor web dist (rebuilt by CI)
+artifacts/simsar/dist/
