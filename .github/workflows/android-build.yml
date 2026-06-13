@@ -44,16 +44,13 @@ jobs:
         working-directory: artifacts/simsar
         run: pnpm exec vite build --config vite.config.capacitor.ts
 
-      - name: Install Capacitor CLI globally
-        run: npm install -g @capacitor/cli@6
-
       - name: Add Android platform
         working-directory: artifacts/simsar
-        run: npx cap add android
+        run: pnpm exec cap add android
 
       - name: Sync Capacitor
         working-directory: artifacts/simsar
-        run: npx cap sync android
+        run: pnpm exec cap sync android
 
       - name: Make Gradle executable
         working-directory: artifacts/simsar/android
